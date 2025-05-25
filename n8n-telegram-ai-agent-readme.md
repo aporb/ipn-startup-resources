@@ -73,13 +73,6 @@ This repository contains a pre-configured n8n workflow for a Telegram-connected 
    * Log interaction in memory
 3. Retrieve conversation context by querying the Postgres table.
 
-## 6. Recommendations
-
-* Move sensitive IDs (chat IDs, user names) into environment variables or a secure database table for scalability.
-* Wrap external API calls in try/catch to handle failures gracefully and notify administrators on repeated errors.
-* Consider modularizing repeated node patterns into sub-workflows for maintainability.
-* Expand `Branch: If` into a dynamic access control list stored in Postgres instead of hardcoded values.
-
-## 7. Contributing
+## 6. Contributing
 
 Feel free to open issues or pull requests for enhancements. This workflow is designed to be a starting point for building advanced, tool-integrated AI agents in n8n.
