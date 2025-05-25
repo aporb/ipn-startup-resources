@@ -75,10 +75,10 @@ This repository contains a pre-configured n8n workflow for a Telegram-connected 
 
 ## 6. Recommendations
 
-* **\[RECOMMENDATION]** Move sensitive IDs (chat IDs, user names) into environment variables or a secure database table for scalability.
-* **\[RECOMMENDATION]** Wrap external API calls in try/catch to handle failures gracefully and notify administrators on repeated errors.
-* **\[RECOMMENDATION]** Consider modularizing repeated node patterns into sub-workflows for maintainability.
-* **\[RECOMMENDATION]** Expand `Branch: If` into a dynamic access control list stored in Postgres instead of hardcoded values.
+* Move sensitive IDs (chat IDs, user names) into environment variables or a secure database table for scalability.
+* Wrap external API calls in try/catch to handle failures gracefully and notify administrators on repeated errors.
+* Consider modularizing repeated node patterns into sub-workflows for maintainability.
+* Expand `Branch: If` into a dynamic access control list stored in Postgres instead of hardcoded values.
 
 ## 7. Contributing
 
