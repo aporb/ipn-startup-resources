@@ -2,6 +2,10 @@
 
 This repository contains a pre-configured n8n workflow for a Telegram-connected AI agent powered by LangChain. The workflow demonstrates how to receive Telegram messages, process them through an AI agent, integrate with external tools, and log contextual memory.
 
+![Telegram AI Agent Workflow](n8n-telegram-ai-agent-screenshot.png)  
+*The Telegram AI Agent workflow*
+
+
 ## 1. Overview
 
 * **Workflow Name**: Simple Telegram AI Agent - v1
