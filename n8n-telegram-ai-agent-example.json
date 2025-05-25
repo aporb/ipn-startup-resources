@@ -1,0 +1,1674 @@
+{
+  "name": "Simple Telegram AI Agent - v1",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        2140,
+        -1040
+      ],
+      "id": "a05d867f-5325-4f71-af97-aaff77a9f116",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=<CONTEXT>\nTelegram request received from {{ $('Branch: If').item.json.message.from.first_name }} {{ $('Branch: If').item.json.message.from.last_name }} (ID: {{ $('Branch: If').item.json.message.chat.id }}) at {{$now}}.\n\nUse the input below to decide whether tool usage is required and respond appropriately.\n\n<ORIGINAL INPUT>\n{{ $('Branch: If').item.json.message.text }}\n\n<THOUGHTS>\n{{ $json.output.notes.clarification_summary }}\n\n{{ $json.output.notes.contextual_enhancements }}\n\n{{ $json.output.notes.default_parameters }}\n\n<ENRICHED INPUT>\n{{ $json.output.enriched_prompt }}\n",
+        "options": {
+          "systemMessage": "You are a high-performance AI agent embedded in an automation stack powered by n8n + LangChain. Your role is to serve as a digital co-pilot: accelerating execution, clarifying inputs, and supporting decisions with structured, tool-aware responses.\n\n[RECOMMENDATION: Describe the agent's persona and function with clarity. Tie to mission outcomes or operational focus.]\n\nYou operate within a broader startup or innovation environment that values precision, speed, and strategic impact. You may be asked to interact with external APIs, internal databases, or automation tools to carry out your tasks.\n\n[RECOMMENDATION: List the ecosystem/tool integrations your agent supports, e.g., Gmail, Postgres, WordPress, Google Drive, Bitly, etc.]\n\nUse integrated tools **only when necessary**, and always return results in a clear, summarized, and actionable format.\n\n### Behavior Guidelines:\n- Be concise, direct, and professional (target: 400–1,000 characters)\n- Use appropriate markup (e.g., HTML for chat clients like Telegram: `<b>`, `<i>`, `<code>`, `<br>`)\n- Structure answers using bullets, tables, or skimmable layouts\n- Never speculate, hallucinate, or guess\n- Handle missing data or tool failures gracefully\n- Avoid filler, redundant preambles, or over-explaining\n- Ask for clarification **once** if input is ambiguous\n- Mirror the user’s tone: pragmatic, focused, and executive-minded\n\n[RECOMMENDATION: Define tone and formatting rules to match user expectations and output destination.]\n\n### Example Use Cases:\n- Summarize or route tool outputs (e.g., databases, cloud services, APIs)\n- Transform user input into agent-ready prompts\n- Enrich content or workflows with real-time data\n- Convert JSON or logs into digestible insights\n- Interface with business automation tools or messaging systems\n\nYou are not a chatbot. You are a decision-support layer within a real-time automation and orchestration stack. Stay grounded in actual context and tool outputs. Be precise. Be fast. Be useful.\n\n[RECOMMENDATION: Reinforce the agent’s role as operational infrastructure, not general conversation.]",
+          "maxIterations": 3,
+          "returnIntermediateSteps": false,
+          "passthroughBinaryImages": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        1640,
+        -620
+      ],
+      "id": "99048253-50d1-403d-93bf-e5464dbfa234",
+      "name": "Instruct: AI Agent",
+      "retryOnFail": true,
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Listen: Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "reply_to_message_id": "={{ $('Listen: Telegram Trigger').item.json.message.message_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2220,
+        -500
+      ],
+      "id": "f05c5413-09ac-44ca-8bf1-639bf58cf859",
+      "name": "Respond: Telegram",
+      "webhookId": "REDACTED",
+      "credentials": {
+        "telegramApi": {
+          "id": "REDACTED",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "user",
+              "message": "={{ $json.result.reply_to_message.text }}"
+            },
+            {
+              "type": "ai",
+              "message": "={{ $json.result.text }}"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        2540,
+        -620
+      ],
+      "id": "b1fd095f-88a5-48e1-9a1e-1a987eb36308",
+      "name": "Log: Chat Memory Manager"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Listen: Telegram Trigger').item.json.message.from.id }}",
+        "contextWindowLength": 100
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        2620,
+        -440
+      ],
+      "id": "8e95b1a8-c315-49c3-8bd2-4507f9800f0f",
+      "name": "Store: Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "REDACTED",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"parameters\": {\n    \"values\": {\n      \"string\": []\n    },\n    \"options\": {\n      \"setAllData\": false\n    }\n  },\n  \"name\": \"Set: Session ID + Meta\",\n  \"type\": \"n8n-nodes-base.set\",\n  \"typeVersion\": 2,\n  \"position\": [\n    120,\n    -240\n  ],\n  \"id\": \"{{ $json.message.chat.id }}\"\n}\n",
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        800,
+        -240
+      ],
+      "id": "7b9e3872-1e5b-4b43-b5c1-810bd9daf142",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "69d36a6b-f859-4928-bfcd-7135702e3e6b",
+              "leftValue": "={{ $json.message.from.id }}",
+              "rightValue": "[MY_CHAT_ID]",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "5ada163a-4076-4b9e-8967-898226c93ab8",
+              "leftValue": "={{ $json.message.chat.id }}",
+              "rightValue": "[MY_CHAT_ID]",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "9661e55c-4a3e-4476-9349-ebe502d83c6a",
+              "leftValue": "={{ $json.message.from.first_name }}",
+              "rightValue": "[FIRST_NAME]",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "0cb380e8-2539-45cb-904d-70656d866c86",
+              "leftValue": "={{ $json.message.from.last_name }}",
+              "rightValue": "[LAST_NAME]",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1020,
+        -240
+      ],
+      "id": "608f4bcd-8817-4e40-9246-93844d9c8e5f",
+      "name": "Branch: If"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "download": true,
+          "imageSize": "medium"
+        }
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        580,
+        -240
+      ],
+      "id": "1a5bc58f-11b4-4c29-9300-24df9dba0479",
+      "name": "Listen: Telegram Trigger",
+      "webhookId": "REDACTED",
+      "credentials": {
+        "telegramApi": {
+          "id": "REDACTED",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getTimeBetweenDates",
+        "startDate": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start_Date', ``, 'string') }}",
+        "endDate": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End_Date', ``, 'string') }}",
+        "units": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Units', ``, 'string') }}",
+        "outputFieldName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Output_Field_Name', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTimeTool",
+      "typeVersion": 2,
+      "position": [
+        2020,
+        -1040
+      ],
+      "id": "b3e5da96-d262-42ea-b0c8-e9890e068648",
+      "name": "TimeCalc dateTimeTool"
+    },
+    {
+      "parameters": {
+        "longUrl": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Long_URL', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.bitlyTool",
+      "typeVersion": 1,
+      "position": [
+        2260,
+        -800
+      ],
+      "id": "d340330a-19ed-4663-9118-dfd30f1e0d70",
+      "name": "Shorten Bitly",
+      "credentials": {
+        "bitlyApi": {
+          "id": "REDACTED",
+          "name": "Bitly account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "5DayForecast",
+        "format": "imperial",
+        "cityName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('City', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.openWeatherMapTool",
+      "typeVersion": 1,
+      "position": [
+        2020,
+        -800
+      ],
+      "id": "3ab1c79b-e7a6-4967-b5d7-2ab7597ca616",
+      "name": "Forecast OpenWeatherMap",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "REDACTED",
+          "name": "OpenWeatherMap account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "gl": "=us",
+          "device": "mobile",
+          "google_domain": "google.com",
+          "hl": "en"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        -1040
+      ],
+      "id": "b9001e93-feb2-49b5-9ffe-952e349e698b",
+      "name": "Search SerpAPI",
+      "credentials": {
+        "serpApi": {
+          "id": "REDACTED",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=INFO:\n- DATE/TIME: {{$now}}\n- USER: {{ $json.message.from.first_name }} {{ $json.message.from.last_name }}\n\n---\nPROMPT: Help me with the following in a clear and concise way please...\n{{ $json.message.text }}",
+        "options": {
+          "systemMessage": "=You are an efficient, knowledgeable assistant focused on delivering clear, concise, and actionable responses. Always prioritize the user's intent and provide solutions with minimal elaboration. Keep responses **professional** and **friendly** without unnecessary disclaimers, fluff, or assumptions.\n\n- **Be concise:** Limit responses to ~500-800 characters unless more is requested.  \n- **Clarity:** Always aim for clarity, especially with complex topics. Simplify when needed.  \n- **Formatting:** Use HTML for Telegram to ensure readability.  \n- **Structure:** Use bullet points, lists, and line breaks to improve output when appropriate.\n\n**Behavior Guidelines:**  \n- Focus on the user's direct request and avoid over-explanation unless explicitly asked.  \n- If a question is ambiguous, ask for clarification **briefly and tactfully**.  \n- Avoid generic or unnecessary filler language—get to the point.\n\n**HTML Formatting for Telegram:**\n- `<b>bold</b>` → bold  \n- `<i>italic</i>` → italic  \n- `<u>underline</u>` → _underline_  \n- `<s>strikethrough</s>` → ~~strikethrough~~  \n- `<code>inline code</code>` → `code`  \n- `<pre>block code</pre>` →  \n   ```\n   block code\n   ```  \n- `<a href=\"URL\">link text</a>` → [link](https://example.com)  \n- Use `<br>` for line breaks  \n- Lists:  \n  • Item 1<br>  \n  • Item 2<br>\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        1640,
+        -20
+      ],
+      "id": "693b3638-776f-48f2-9994-91504239e6a6",
+      "name": "Instruct: AI for Others"
+    },
+    {
+      "parameters": {
+        "model": "google/gemini-2.0-flash-exp:free",
+        "options": {
+          "frequencyPenalty": 0,
+          "maxTokens": -1,
+          "responseFormat": "text",
+          "presencePenalty": 0,
+          "temperature": 0.7,
+          "timeout": 360000,
+          "maxRetries": 2,
+          "topP": 1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1620,
+        180
+      ],
+      "id": "367e89c6-af36-4663-8149-4ae8fc393139",
+      "name": "Gemini 2.5 pro",
+      "credentials": {
+        "openRouterApi": {
+          "id": "REDACTED",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Listen: Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "reply_to_message_id": "={{ $('Listen: Telegram Trigger').item.json.message.message_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2080,
+        -180
+      ],
+      "id": "ffb73375-24b9-4160-90f5-4f4edea466a5",
+      "name": "Respond: Telegram Others",
+      "webhookId": "REDACTED",
+      "credentials": {
+        "telegramApi": {
+          "id": "REDACTED",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "user",
+              "message": "={{ $json.result.reply_to_message.text }}"
+            },
+            {
+              "type": "ai",
+              "message": "={{ $json.result.text }}"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        2320,
+        -20
+      ],
+      "id": "281583c4-47ab-4ac6-8c38-736ba80baa03",
+      "name": "Log: Chat Memory Manager Others"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Listen: Telegram Trigger').item.json.message.from.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        2380,
+        160
+      ],
+      "id": "b8a5cede-8a57-44cd-81f8-6d7a368d8e3f",
+      "name": "Store: Postgress Chat Memory 2",
+      "credentials": {
+        "postgres": {
+          "id": "REDACTED",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields').item.json.id }}",
+        "contextWindowLength": 25
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        1780,
+        180
+      ],
+      "id": "06629291-dfff-45dc-ad5e-09b45dc44d8f",
+      "name": "Remember: Postgres Chat Memory 2",
+      "credentials": {
+        "postgres": {
+          "id": "REDACTED",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        2180,
+        160
+      ],
+      "id": "d74e7a78-df15-4055-94e2-40e03e7dfe5a",
+      "name": "Calculator Others"
+    },
+    {
+      "parameters": {
+        "format": "imperial",
+        "cityName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('City', ``, 'string') }}",
+        "language": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Language', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.openWeatherMapTool",
+      "typeVersion": 1,
+      "position": [
+        2020,
+        0
+      ],
+      "id": "5d5fc607-60d3-4747-8687-1701eeea01de",
+      "name": "OpenWeatherMap",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "REDACTED",
+          "name": "OpenWeatherMap account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "5DayForecast",
+        "cityName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('City', ``, 'string') }}",
+        "language": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Language', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.openWeatherMapTool",
+      "typeVersion": 1,
+      "position": [
+        2180,
+        0
+      ],
+      "id": "3a67b13f-5e07-42f4-a90d-6eb9c55cfe60",
+      "name": "OpenWeatherMap1",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "REDACTED",
+          "name": "OpenWeatherMap account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getTimeBetweenDates",
+        "startDate": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start_Date', ``, 'string') }}",
+        "endDate": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End_Date', ``, 'string') }}",
+        "units": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Units', ``, 'string') }}",
+        "outputFieldName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Output_Field_Name', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTimeTool",
+      "typeVersion": 2,
+      "position": [
+        2020,
+        300
+      ],
+      "id": "452bdc82-0e10-4b34-9473-1d670c9d3881",
+      "name": "Date Time"
+    },
+    {
+      "parameters": {
+        "longUrl": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Long_URL', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.bitlyTool",
+      "typeVersion": 1,
+      "position": [
+        2180,
+        300
+      ],
+      "id": "9ff829c1-8651-4554-aba1-fee053a43ac8",
+      "name": "Bitly",
+      "credentials": {
+        "bitlyApi": {
+          "id": "REDACTED",
+          "name": "Bitly account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Bitlink', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.bitlyTool",
+      "typeVersion": 1,
+      "position": [
+        2020,
+        160
+      ],
+      "id": "9558034f-377a-4bd1-b186-f9aa81f95fdf",
+      "name": "Bitly1",
+      "credentials": {
+        "bitlyApi": {
+          "id": "REDACTED",
+          "name": "Bitly account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 100,
+        "simple": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Simplify', ``, 'boolean') }}",
+        "filters": {},
+        "options": {
+          "downloadAttachments": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1740,
+        -800
+      ],
+      "id": "005d054d-5ceb-4649-a5d4-da6e985a47fe",
+      "name": "GetMany Gmail",
+      "webhookId": "REDACTED",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REDACTED",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', ``, 'string') }}",
+        "simple": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Simplify', ``, 'boolean') }}",
+        "options": {
+          "downloadAttachments": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Download_Attachments', ``, 'boolean') }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1340,
+        -1040
+      ],
+      "id": "de6c7df4-3643-4082-947c-c6c069cf9617",
+      "name": "ReadOne Gmail",
+      "webhookId": "REDACTED",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REDACTED",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "markAsRead",
+        "messageId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1480,
+        -1040
+      ],
+      "id": "7aca9aaa-6640-4865-a4a1-d2744e4c704c",
+      "name": "MarkRead Gmail",
+      "webhookId": "REDACTED",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REDACTED",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "markAsUnread",
+        "messageId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1600,
+        -1040
+      ],
+      "id": "b0bada18-2ac8-4584-bc72-770467dbf62d",
+      "name": "MarkUnread Gmail",
+      "webhookId": "REDACTED",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REDACTED",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', ``, 'string') }}",
+        "labelIds": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Label_Names_or_IDs', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1340,
+        -800
+      ],
+      "id": "67492806-557a-4b19-9d31-c1269acb1e76",
+      "name": "AddLabel Gmail",
+      "webhookId": "REDACTED",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REDACTED",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "removeLabels",
+        "messageId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', ``, 'string') }}",
+        "labelIds": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Label_Names_or_IDs', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1480,
+        -800
+      ],
+      "id": "7eee18a1-1142-4d7d-8bd5-dad4d125b834",
+      "name": "RemoveLabel Gmail",
+      "webhookId": "REDACTED",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REDACTED",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Append_n8n_Attribution', ``, 'boolean') }}",
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Attachment_Field_Name', ``, 'string') }}"
+              }
+            ]
+          },
+          "bccList": "telegram_bot@domain.com",
+          "senderName": "USER's Assistant",
+          "replyToSenderOnly": true
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1600,
+        -800
+      ],
+      "id": "1504e8f2-33da-4eba-8242-e9573de06433",
+      "name": "Reply Gmail",
+      "webhookId": "REDACTED",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REDACTED",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "WordPress_2_Linkedin",
+        "description": "Call this tool to take my Wordpress blog posts and send them to LinkedIn using the attached n8n workflow.  WP-2-LinkedIn",
+        "workflowId": {
+          "__rl": true,
+          "value": "REDACTED",
+          "mode": "list",
+          "cachedResultName": "(2) WP to LinkedIn - v1"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.1,
+      "position": [
+        1740,
+        -1040
+      ],
+      "id": "2fba02f4-ed8f-4604-9218-0b7eb3475ea2",
+      "name": "Call WP2LinkedIn"
+    },
+    {
+      "parameters": {
+        "format": "imperial",
+        "cityName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('City', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.openWeatherMapTool",
+      "typeVersion": 1,
+      "position": [
+        2260,
+        -1040
+      ],
+      "id": "3a904e0a-a522-4ed8-ba50-f5add477b2ee",
+      "name": "Current OpenWeatherMap",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "REDACTED",
+          "name": "OpenWeatherMap account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "5DayForecast",
+        "format": "imperial",
+        "locationSelection": "zipCode",
+        "zipCode": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Zip_Code', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.openWeatherMapTool",
+      "typeVersion": 1,
+      "position": [
+        2400,
+        -1040
+      ],
+      "id": "a3d93e3c-d7d7-441a-995a-27c0f8736bbf",
+      "name": "ForecastZip OpenWeatherMap",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "REDACTED",
+          "name": "OpenWeatherMap account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "format": "imperial",
+        "locationSelection": "zipCode",
+        "zipCode": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Zip_Code', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.openWeatherMapTool",
+      "typeVersion": 1,
+      "position": [
+        2540,
+        -1040
+      ],
+      "id": "b91c1563-8081-4a2f-b34a-8ada25ad5149",
+      "name": "CurrentZip OpenWeatherMap",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "REDACTED",
+          "name": "OpenWeatherMap account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "limit": 50,
+        "queryString": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Search_Query', ``, 'string') }}",
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "filter": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTool",
+      "typeVersion": 3,
+      "position": [
+        1880,
+        -800
+      ],
+      "id": "ec2886c9-0ac2-49db-96ec-30fc87ebd23f",
+      "name": "Browse GoogleDrive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REDACTED",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Input_Data_Field_Name', ``, 'string') }}",
+        "name": "=",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Parent_Folder', ``, 'string') }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTool",
+      "typeVersion": 3,
+      "position": [
+        2140,
+        -800
+      ],
+      "id": "b122a532-e8de-4036-bd7f-ffe112035687",
+      "name": "UploadFile GoogleDrive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REDACTED",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Schema', ``, 'string') }}",
+          "mode": "name"
+        },
+        "table": {
+          "__rl": true,
+          "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Table', ``, 'string') }}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        2400,
+        -800
+      ],
+      "id": "f7805fa6-8b9a-4ee2-9179-9daeb3997bae",
+      "name": "InsertUpdate Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "REDACTED",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Schema', ``, 'string') }}",
+          "mode": "name"
+        },
+        "table": {
+          "__rl": true,
+          "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Table', ``, 'string') }}",
+          "mode": "name"
+        },
+        "limit": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Limit', ``, 'number') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        2540,
+        -800
+      ],
+      "id": "9504d3df-6b3b-43e1-9708-39d706404721",
+      "name": "Select Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "REDACTED",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title', ``, 'string') }}",
+        "additionalFields": {
+          "authorId": 1,
+          "content": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Content', ``, 'string') }}",
+          "slug": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Slug', ``, 'string') }}",
+          "status": "draft",
+          "commentStatus": "closed",
+          "format": "standard",
+          "categories": [
+            2
+          ],
+          "tags": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Tag_Names_or_IDs', ``, 'string') }}",
+          "postTemplate": {
+            "values": {
+              "elementor": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Elementor_Template', ``, 'boolean') }}"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.wordpressTool",
+      "typeVersion": 1,
+      "position": [
+        1220,
+        -1040
+      ],
+      "id": "3a2b586e-e18f-47e2-8526-82fc9638e26a",
+      "name": "CreatePost Wordpress",
+      "credentials": {
+        "wordpressApi": {
+          "id": "REDACTED",
+          "name": "Wordpress account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "options": {
+          "context": "embed",
+          "orderBy": "id"
+        }
+      },
+      "type": "n8n-nodes-base.wordpressTool",
+      "typeVersion": 1,
+      "position": [
+        1220,
+        -800
+      ],
+      "id": "221f07b1-a3e7-40a4-b437-560af890a68e",
+      "name": "GetMany Wordpress",
+      "credentials": {
+        "wordpressApi": {
+          "id": "REDACTED",
+          "name": "Wordpress account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "postId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Post_ID', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.wordpressTool",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        -800
+      ],
+      "id": "567d8c3b-a9ee-45fc-a4a7-e331917c7011",
+      "name": "Get Wordpress",
+      "credentials": {
+        "wordpressApi": {
+          "id": "REDACTED",
+          "name": "Wordpress account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "postId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Post_ID', ``, 'string') }}",
+        "updateFields": {}
+      },
+      "type": "n8n-nodes-base.wordpressTool",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        -1040
+      ],
+      "id": "b7c873c3-91e4-4631-9d0b-92cfa326520b",
+      "name": "Update Wordpress",
+      "credentials": {
+        "wordpressApi": {
+          "id": "REDACTED",
+          "name": "Wordpress account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {
+          "frequencyPenalty": 0,
+          "maxTokens": -1,
+          "responseFormat": "text",
+          "presencePenalty": 0,
+          "temperature": 0.5,
+          "timeout": 60000,
+          "maxRetries": 2,
+          "topP": 0.9
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1600,
+        -420
+      ],
+      "id": "96e48a11-8401-4658-8c63-7b68679c95be",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "REDACTED",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields').item.json.message.chat.id }}",
+        "contextWindowLength": 3
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        1800,
+        -340
+      ],
+      "id": "774233b9-836f-46e5-86b8-78a23cbe58f1",
+      "name": "Remember: Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "REDACTED",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"enriched_prompt\": \"Final clarified task, tool-ready.\",\n  \"notes\": {\n    \"clarification_summary\": \"What ambiguity was resolved.\",\n    \"contextual_enhancements\": \"Assumptions or additions made.\",\n    \"default_parameters\": \"Defaults applied, including formats or filters.\"\n  }\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1460,
+        -240
+      ],
+      "id": "ff18d44c-4f66-4105-bc13-005d26e1c9a4",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "model": "google/gemini-2.5-pro-exp-03-25:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        -280
+      ],
+      "id": "8abf761c-a7ab-4183-8b09-93ea1b22e949",
+      "name": "OpenRouter Chat Model2",
+      "credentials": {
+        "openRouterApi": {
+          "id": "REDACTED",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Transform the following raw user input into a clarified and enriched instruction, ready for execution by a high-performance AI agent.\n\nFollow the format exactly:\n\n<ENRICHED_PROMPT>\n[Insert cleaned-up, context-aware task instruction here]\n</ENRICHED_PROMPT>\n\n<NOTES>\n• Clarification (if any)\n• Contextual assumptions added\n• Tool hints or defaults inferred\n</NOTES>\n\nClarify and enrich the following user input to remove ambiguity. Output in the strict JSON format below:\n\n{\n  \"enriched_prompt\": \"[Final clarified task, tool-ready]\",\n  \"notes\": {\n    \"clarification_summary\": \"[What ambiguity was resolved]\",\n    \"contextual_enhancements\": \"[Assumptions or additions made]\",\n    \"default_parameters\": \"[Defaults applied, including formats or filters]\"\n  }\n}\n\n---\nUser Input:\n“{{ $json.message.text }}”\n",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are the Ambiguity Clarity engine for {{ $json.message.from.first_name }} {{ $json.message.from.last_name }}’s AI automation system. Your job is to take raw user input, resolve ambiguity, and enrich the request with relevant context, so that downstream AI agents can execute instructions more accurately and efficiently.  You always output in the following structured format:  \n\n<ENRICHED_PROMPT> \n[Final clarified + enriched instruction]\n</ENRICHED_PROMPT>\n\n<NOTES> \n• Clarification summary (what was ambiguous and how it was clarified) \n• Contextual assumptions or enhancements (tools, preferences, recent activity) \n• Any default parameters or constraints you applied \n</NOTES>  \n\nBehavior Rules:\n- Be concise and tool-ready.\n- Never speculate; only clarify if ambiguity is detected.\n- Default to task-oriented action phrasing (imperatives).\n- Inject context only when useful (e.g. known tools, user preferences).\n- Never execute the task\n— just return a cleaned-up instruction."
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        1280,
+        -440
+      ],
+      "id": "f1fd1ff5-af4e-4833-b549-f56065168006",
+      "name": "Ambiguity Clarity",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instruct: AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond: Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond: Telegram": {
+      "main": [
+        [
+          {
+            "node": "Log: Chat Memory Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store: Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Log: Chat Memory Manager",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Branch: If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Branch: If": {
+      "main": [
+        [
+          {
+            "node": "Ambiguity Clarity",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Instruct: AI for Others",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listen: Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TimeCalc dateTimeTool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shorten Bitly": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Forecast OpenWeatherMap": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instruct: AI for Others": {
+      "main": [
+        [
+          {
+            "node": "Respond: Telegram Others",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 2.5 pro": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Instruct: AI for Others",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond: Telegram Others": {
+      "main": [
+        [
+          {
+            "node": "Log: Chat Memory Manager Others",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store: Postgress Chat Memory 2": {
+      "ai_memory": [
+        [
+          {
+            "node": "Log: Chat Memory Manager Others",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remember: Postgres Chat Memory 2": {
+      "ai_memory": [
+        [
+          {
+            "node": "Instruct: AI for Others",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator Others": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI for Others",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenWeatherMap": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI for Others",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenWeatherMap1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI for Others",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date Time": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI for Others",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bitly": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI for Others",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bitly1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI for Others",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetMany Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ReadOne Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MarkUnread Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MarkRead Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AddLabel Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RemoveLabel Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call WP2LinkedIn": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Current OpenWeatherMap": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ForecastZip OpenWeatherMap": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CurrentZip OpenWeatherMap": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Browse GoogleDrive": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UploadFile GoogleDrive": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "InsertUpdate Postgres": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Postgres": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CreatePost Wordpress": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetMany Wordpress": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Wordpress": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Wordpress": {
+      "ai_tool": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remember: Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Ambiguity Clarity",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ambiguity Clarity": {
+      "main": [
+        [
+          {
+            "node": "Instruct: AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Ambiguity Clarity",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "395c6110-dec2-4c50-91a2-8a7ccdf1a2c6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "REDACTED"
+  },
+  "id": "REDACTED",
+  "tags": []
+}
