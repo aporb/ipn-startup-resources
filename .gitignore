@@ -1,0 +1,52 @@
+# macOS system files
+.DS_Store              # Finder settings file
+.AppleDouble           # Resource fork files
+.LSOverride            # Directory-specific settings
+
+# Temporary files
+*.tmp                  # General temporary files
+*.swp                  # Vim swap files
+*.swo                  # Vim secondary swap files
+~$*                    # Microsoft Office temporary files
+
+# Node.js/n8n specific
+node_modules/          # Node.js dependencies (always ignore)
+.env                   # Environment variables (sensitive!)
+.n8n/                  # n8n configuration directory
+*.log                  # Log files
+dist/                  # Build output directory
+
+# Python specific
+__pycache__/           # Python bytecode cache
+*.py[cod]              # Python compilation artifacts
+venv/                  # Virtual environment directory
+.python-version        # Python version manager file
+
+# IDE and editor configurations
+.idea/                 # JetBrains IDE
+.vscode/               # VS Code settings
+*.code-workspace       # VS Code workspace files
+
+# Credentials and sensitive data
+*.key                  # Private keys
+*.pem                  # Certificate files
+*.cert                 # Certificate files
+credentials.json       # Application credentials
+
+# n8n specific (additional)
+*.credentials          # n8n credential backups
+# n8n_*.json             # n8n auto-backups
+workflow_cache/        # n8n execution cache
+
+# Testing and coverage reports
+coverage/              # Test coverage reports
+test-results/          # Test output files
+*.lcov                 # LCOV coverage data
+
+# Package manager files
+yarn.lock              # Yarn lockfile (if not using npm)
+package-lock.json      # npm lockfile (if not committed)
+
+# Documentation artifacts
+_site/                 # Static site generators
+*.html                 # Built documentation (if using source)
