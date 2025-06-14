@@ -38,7 +38,7 @@ This repository contains a production-grade **n8n workflow** for automated, AI-p
 ### Prerequisites
 
 - Node.js (latest LTS recommended)  
-- n8n version tested: 0.x.x (update as appropriate)  
+- n8n version tested: 1.97.1  
 - Postgres database up and running  
 
 ### Steps
