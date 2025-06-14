@@ -41,7 +41,7 @@ An automated, AI-powered pipeline in n8n that:
 - Persists all data and metadata in Postgres
 
 Setup and usage details are available in [`n8n-ExecutiveOrder-agent-readme.md`](./n8n-ExecutiveOrder-agent-readme.md)
-Workflow JSON: `n8n-ExecutiveOrder-agent-example.json` (check repo)
+Workflow JSON: `n8n-ExecutiveOrder-agent-example.json` (./n8n-ExecutiveOrder-agent-example.json)
 
 ---
 
