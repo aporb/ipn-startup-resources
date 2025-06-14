@@ -1,0 +1,2009 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "functionCode": "const output = [];\n\nfor (const html of items[0].json.postHtml) {\n  const linkMatch = html.match(/<h2[^>]*>\\s*<a href=\"([^\"]+)\"[^>]*>(.*?)<\\/a>/i);\n  const dateMatch = html.match(/<time[^>]+datetime=\"([^\"]+)\"/i);\n\n  const tagsBlockMatch = html.match(/<div class=\"taxonomy-category wp-block-post-terms\">([\\s\\S]*?)<\\/div>/i);\n  const tags = [];\n  if (tagsBlockMatch) {\n    const tagMatches = tagsBlockMatch[1].match(/<a[^>]+>([^<]+)<\\/a>/g);\n    if (tagMatches) {\n      for (const tagAnchor of tagMatches) {\n        const tagText = tagAnchor.replace(/<[^>]*>/g, \"\").trim();\n        tags.push(tagText);\n      }\n    }\n  }\n\n  if (linkMatch && dateMatch) {\n    const rawDate = new Date(dateMatch[1]);\n\n    output.push({\n      json: {\n        title: linkMatch[2].trim(),\n        url: linkMatch[1],\n        date: rawDate.toLocaleString(\"en-US\", {\n          timeZone: \"America/New_York\",\n          year: \"numeric\",\n          month: \"long\",\n          day: \"2-digit\",\n          hour: \"2-digit\",\n          minute: \"2-digit\",\n          hour12: true,\n        }),\n        date_posted_et: rawDate.toISOString(), // ✅ proper timestamp\n        tags: tags\n      }\n    });\n  }\n}\n\nreturn output;\n"
+      },
+      "id": "e5bc3a47-bdc3-45ca-a3c9-603ac2a36c34",
+      "name": "Extract EO Links",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -1480,
+        600
+      ]
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2340,
+        400
+      ],
+      "id": "b660e862-cf6c-4e5a-b04c-797e663751cc",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "postHtml",
+              "cssSelector": "li.wp-block-post",
+              "returnValue": "html",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {
+          "trimValues": true,
+          "cleanUpText": true
+        }
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        -1700,
+        600
+      ],
+      "id": "db01074b-4664-43a1-8d6a-ad19a956e2d9",
+      "name": "Extract Articles"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id FROM executive_orders WHERE url = $1;",
+        "options": {
+          "queryReplacement": "={{ $json.url }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1880,
+        280
+      ],
+      "id": "10fcabe3-33c1-443b-af82-beb745ec9d0b",
+      "name": "Check if Exists",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "dBqsBvg5NiNF86t6",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b10955b6-3be6-4361-9d3d-2a40a3b42f30",
+              "leftValue": "={{$json[\"id\"]}}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1700,
+        340
+      ],
+      "id": "8cae5c01-fcc1-4ad2-aa2e-ef6ecad451dc",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "executive_orders",
+          "mode": "list",
+          "cachedResultName": "executive_orders"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "is_vectorized": false,
+            "is_summarized": false,
+            "is_published": false,
+            "title": "={{ $('SplitInBatches').item.json.title }}",
+            "url": "={{ $('SplitInBatches').item.json.url }}",
+            "page_number": 0,
+            "date_posted_et": "={{ $('SplitInBatches').item.json.date_posted_et }}",
+            "tags": "={{ $('SplitInBatches').item.json.tags }}",
+            "scraped_at": "={{ $('SplitInBatches').item.json.scraped_at }}",
+            "source": "={{ $('SplitInBatches').item.json.source }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "date_posted_et",
+              "displayName": "date_posted_et",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tags",
+              "displayName": "tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "array",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "scraped_at",
+              "displayName": "scraped_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "page_number",
+              "displayName": "page_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "version_hash",
+              "displayName": "version_hash",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "is_vectorized",
+              "displayName": "is_vectorized",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "is_summarized",
+              "displayName": "is_summarized",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "is_published",
+              "displayName": "is_published",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "vector_id",
+              "displayName": "vector_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1480,
+        400
+      ],
+      "id": "c71749af-6f84-43a0-a35d-9b620ea84db4",
+      "name": "Insert New Record",
+      "credentials": {
+        "postgres": {
+          "id": "dBqsBvg5NiNF86t6",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3cb905df-a996-43bf-8d8f-4fcdc486024e",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "efa8926c-5cf4-4d60-9139-556da22d2b7b",
+              "name": "url",
+              "value": "={{ $json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "f7a8d59c-ad82-4c77-8191-6eb970ff2137",
+              "name": "date_posted_et",
+              "value": "={{ $json.date_posted_et }}",
+              "type": "string"
+            },
+            {
+              "id": "0046414a-813d-4dda-8125-2d8be3ab8c8d",
+              "name": "tags",
+              "value": "={{$json[\"tags\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "5bdc42c5-1ca9-4af8-a10f-2d301c71a288",
+              "name": "source",
+              "value": "\"whitehouse.gov\"",
+              "type": "string"
+            },
+            {
+              "id": "dc226610-0927-4ad8-a320-be75e8d57503",
+              "name": "scraped_at",
+              "value": "={{ new Date().toISOString() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1260,
+        600
+      ],
+      "id": "b3295438-2a95-4d18-8bb2-22134317f974",
+      "name": "Normalize EO Fields"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -2060,
+        180
+      ],
+      "id": "bf930835-04e8-4a24-9358-b9805e8d8413",
+      "name": "SplitInBatches"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "executive_orders",
+          "mode": "list",
+          "cachedResultName": "executive_orders"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "summary",
+              "condition": "IS NULL"
+            },
+            {
+              "column": "content",
+              "condition": "IS NULL"
+            }
+          ]
+        },
+        "sort": {
+          "values": [
+            {
+              "column": "date_posted_et",
+              "direction": "DESC"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1560,
+        200
+      ],
+      "id": "02c54522-0b5a-4437-b27a-adbce9302201",
+      "name": "Find Unprocessed",
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "dBqsBvg5NiNF86t6",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1040,
+        440
+      ],
+      "id": "26c1fdcf-2e58-4176-9688-b143cfafbcb2",
+      "name": "SplitInBatches2"
+    },
+    {
+      "parameters": {
+        "url": "={{$json[\"url\"]}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -820,
+        440
+      ],
+      "id": "49703770-14ac-4496-864d-68297b2d91f0",
+      "name": "Fetch EO HTML"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "content",
+              "cssSelector": ".entry-content.wp-block-post-content.has-global-padding.is-layout-constrained.wp-block-post-content-is-layout-constrained",
+              "returnValue": "html"
+            }
+          ]
+        },
+        "options": {
+          "trimValues": true,
+          "cleanUpText": true
+        }
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        -600,
+        440
+      ],
+      "id": "e99360e2-07aa-4a16-b868-3a4ed074a2cb",
+      "name": "Extract EO Content"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      content: $input.first().json.content\n        .replace(/^[\\s\\S]*?<h1 class=\"wp-block-whitehouse-topper__headline\">/, '<h1 class=\"wp-block-whitehouse-topper__headline\">')\n        .replace(/\\s{2,}/g, ' ')\n        .replace(/<[^>]*>/g, '') // ← Remove all HTML tags\n        .trim()\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -380,
+        440
+      ],
+      "id": "b8e1caf8-3c53-45a0-9dc5-0b6d073456ee",
+      "name": "Clean Content"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      prompt: `You are a senior federal policy analyst with deep expertise in artificial intelligence, defense acquisition, and federal digital transformation.\n\nYour task is to analyze the following Executive Order (EO) using the lens of national security trends, evolving public-sector innovation, and cross-agency digital strategies. Incorporate contextual knowledge and current strategic policy discourse.\n\nReturn your analysis in JSON format.\n\n---\nEO Metadata:\nTitle: ${$('SplitInBatches2').first().json.title}\nDate Published: ${$('SplitInBatches2').first().json.date_posted_et}\nURL: ${$('SplitInBatches2').first().json.url}\nTags: ${($('SplitInBatches2').first().json.tags || []).join(\", \")}\n\n---\nContent:\n${$input.first().json.content}\n---`\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        440
+      ],
+      "id": "6ce6dec8-0cff-492e-a710-8a4e967265c3",
+      "name": "Create Prompt"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a highly specialized AI agent supporting senior leaders across the U.S. Federal Government, Armed Forces, and Defense Industry. Your mission is to analyze Executive Orders (EOs) through the lens of national security, public-sector innovation, federal acquisition, and AI transformation.\n\nYour analysis will inform Flag Officers, SES leaders, CXOs, and senior program managers. These stakeholders rely on your output to shape priorities, assess policy risks, and align strategic investments.\n\nYou are expected to understand evolving defense policy, interagency coordination, and emerging trends such as AI governance, cybersecurity mandates, digital modernization, and whole-of-government transformation.\n\nYou have access to search the web via Perplexity to research everything.\n\nGuidelines:\n- Be concise but analytical. This is for rapid situational awareness.\n- Use current context and implications—not just the text of the EO.\n- Highlight operational, agency, and contractor-level impacts.\n- Cite sections or phrases from the EO only when directly relevant.\n- Never repeat EO text verbatim—summarize and interpret.\n- Never include disclaimers. You are trained for high-confidence, senior-level decision support.\n\n---\n\nRespond only in the following structured **JSON format**:\n\n```json\n{\n  \"summary\": \"One-paragraph executive summary written for a Flag Officer or SES. Interpret the EO in national security, modernization, and interagency context.\",\n\n  \"strategic_impact\": {\n    \"policy_intent\": \"What is the EO trying to accomplish from a federal or defense policy perspective?\",\n    \"agency_impact\": \"What federal departments/agencies are most affected? How?\",\n    \"contractor_implications\": \"What should contractors, integrators, and vendors expect (e.g., shifts in procurement, new opportunities)?\",\n    \"budgetary_signals\": \"Does this EO hint at reprogramming, OMB shifts, or changes in defense/non-defense allocations?\",\n    \"watchpoints\": [\n      \"List of 2–5 risks, ambiguities, or legal/political friction points to watch.\"\n    ]\n  },\n\n  \"notes\": [\n    \"Freeform analyst annotations — cite related EOs, FAR rules, mandates, or side-effects worth monitoring.\"\n  ],\n\n  \"relevance_score\": 1–5,  // Integer. 5 = high-impact for defense/contracting leadership, 1 = low relevance\n\n  \"keywords\": [\n    \"Extract 5–10 keywords summarizing major themes (e.g., AI governance, interagency coordination)\"\n  ]\n}\n```\n\nOnly respond in the above format. No extra commentary. Begin your analysis now.",
+          "maxIterations": 3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -760,
+        600
+      ],
+      "id": "523e9398-22cd-4fa0-accd-ff224ecb4a9b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"summary\": \"This Executive Order directs the U.S. Armed Forces to assume a lead role in sealing the southern border against unlawful entry, framing the situation as an active invasion. It authorizes jurisdictional control of federal lands for military use and expands defense authorities under a national emergency posture. The policy signals a shift toward militarized border control and interagency realignment involving DoD, DHS, and DOI. Contractors supporting surveillance, logistics, or infrastructure at the border should prepare for urgent tasking and rapid acquisitions.\",\n  \n  \"strategic_impact\": {\n    \"policy_intent\": \"To empower the Department of Defense to lead the physical and operational securing of the southern border, treating unauthorized entry as an act of invasion.\",\n    \"agency_impact\": \"Directly affects DoD, DHS (especially CBP), Department of the Interior, and USDA. Potential indirect effects on DOJ and FEMA.\",\n    \"contractor_implications\": \"Increased demand for logistics, perimeter surveillance systems, drone/aerial reconnaissance, mobile C2 units, and rapid-deployment construction. Expect IDIQ acceleration and modified acquisition timelines.\",\n    \"budgetary_signals\": \"Signals potential reprogramming of defense budgets to border-related O&M accounts. May justify supplemental appropriations under national security rationale.\",\n    \"watchpoints\": [\n      \"Potential constitutional challenges around Posse Comitatus implications\",\n      \"Ambiguity in rules of engagement for military forces on U.S. soil\",\n      \"Possible friction with state and tribal jurisdiction over federal lands\"\n    ]\n  },\n\n  \"notes\": [\n    \"Mentions Proclamation 10886 and EO 14167 as foundational authorities—track these as governing documents.\",\n    \"May trigger EO review from OMB due to budgetary impact; contractors should monitor FAR updates and CLASSDEV notifications.\",\n    \"Designates Roosevelt Reservation lands for DoD control—watch for DoD/Federal land-use procedural exceptions.\"\n  ],\n\n  \"relevance_score\": 5,\n\n  \"keywords\": [\n    \"border security\",\n    \"military operations\",\n    \"DoD acquisition\",\n    \"national emergency\",\n    \"federal land use\",\n    \"public-private partnerships\",\n    \"interagency coordination\"\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -540,
+        820
+      ],
+      "id": "c9ee2016-edb6-4f2d-897b-54c560ca1493",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-3-5-sonnet-20241022",
+          "mode": "list",
+          "cachedResultName": "Claude 3.5 Sonnet (New)"
+        },
+        "options": {
+          "maxTokensToSample": 8192,
+          "thinking": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        -820,
+        820
+      ],
+      "id": "a1a383bf-194b-46d2-8092-7d3fc9b5c71d",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "VTpIHqgUoKAhPG25",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Search Perplixity for information",
+        "method": "POST",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"sonar\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a senior federal policy analyst and research agent supporting strategic decision-making across the Department of Defense, federal civilian agencies, and the defense industrial base.\\n\\nYour job is to conduct open-source enrichment and research using Perplexity-style reasoning and authoritative sources to add timely, relevant, and mission-aligned context. Prioritize national security, emerging technologies, procurement trends, legislative activity, and public-sector innovation.\\n\\nReturn only insights that are grounded, relevant to the policy community, and beneficial for agency, military, or contractor interpretation.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Provide expert background, relevant context, and any notable developments related to the following Executive Order:\\n\\nEO Title: {{ $('SplitInBatches2').item.json.title }}\\nPublished On: {{ $('SplitInBatches2').item.json.date_posted_et }}\\nTags: {{ $('SplitInBatches2').item.json.tags }}\\nURL: {{ $('SplitInBatches2').item.json.url }}\\n\\nKey areas of focus:\\n- Legal and regulatory implications\\n- AI or digital transformation impact\\n- Defense or homeland security relevance\\n- Potential contractor opportunities or risks\\n- Related historical or policy precedents\"\n    }\n  ],\n  \"temperature\": 0.3,\n  \"top_p\": 0.9,\n  \"return_images\": false,\n  \"return_related_questions\": false,\n  \"search_recency_filter\": \"month\",\n  \"top_k\": 0,\n  \"stream\": false,\n  \"presence_penalty\": 0,\n  \"frequency_penalty\": 0.9,\n  \"response_format\": null\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        -680,
+        820
+      ],
+      "id": "ffefa121-9dd3-46ca-8938-6642df6ce92e",
+      "name": "Perplexity Search",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "3JPJH4keKwGwQq19",
+          "name": "Perplexity Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "executive_orders",
+          "mode": "list",
+          "cachedResultName": "executive_orders"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "is_vectorized": false,
+            "is_summarized": true,
+            "is_published": false,
+            "id": "={{ $('SplitInBatches2').item.json.id }}",
+            "summary": "={{ $json.output.summary }}",
+            "policy_intent": "={{ $json.output.strategic_impact.policy_intent }}",
+            "agency_impact": "={{ $json.output.strategic_impact.agency_impact }}",
+            "contractor_implications": "={{ $json.output.strategic_impact.contractor_implications }}",
+            "budgetary_signals": "={{ $json.output.strategic_impact.budgetary_signals }}",
+            "watchpoints": "={{ $json.output.strategic_impact.watchpoints }}",
+            "notes": "={{ $json.output.notes }}",
+            "relevance_score": "={{ $json.output.relevance_score }}",
+            "strategic_keywords": "={{ $json.output.keywords }}",
+            "page_number": 0,
+            "content": "={{ $('Clean Content').item.json.content }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "date_posted_et",
+              "displayName": "date_posted_et",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tags",
+              "displayName": "tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "array",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "scraped_at",
+              "displayName": "scraped_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "page_number",
+              "displayName": "page_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "version_hash",
+              "displayName": "version_hash",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "is_vectorized",
+              "displayName": "is_vectorized",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "is_summarized",
+              "displayName": "is_summarized",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "is_published",
+              "displayName": "is_published",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "vector_id",
+              "displayName": "vector_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "policy_intent",
+              "displayName": "policy_intent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "agency_impact",
+              "displayName": "agency_impact",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "contractor_implications",
+              "displayName": "contractor_implications",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "budgetary_signals",
+              "displayName": "budgetary_signals",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "watchpoints",
+              "displayName": "watchpoints",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "array",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "strategic_keywords",
+              "displayName": "strategic_keywords",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "array",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "relevance_score",
+              "displayName": "relevance_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -380,
+        680
+      ],
+      "id": "16583866-abba-43b3-a2c6-edeea9495037",
+      "name": "Update Record",
+      "credentials": {
+        "postgres": {
+          "id": "dBqsBvg5NiNF86t6",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "EOIntelBrief@domain.com",
+        "subject": "={{ $json.output.subject }}",
+        "message": "={{ $json.output.html }}",
+        "options": {
+          "appendAttribution": false,
+          "bccList": "test@email.com",
+          "senderName": "EO Intel Brief",
+          "replyTo": "EOIntelBrief@domain.com",
+          "replyToSenderOnly": true
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        20,
+        -260
+      ],
+      "id": "65b06243-f6c2-41ff-9d59-5113a1a73bef",
+      "name": "Gmail",
+      "webhookId": "0baf1592-968e-43b7-9122-446ea30f62dd",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "MW3ZYNaoHRts2QXA",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-3-5-sonnet-20241022",
+          "mode": "list",
+          "cachedResultName": "Claude 3.5 Sonnet (New)"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        60
+      ],
+      "id": "ed6fa030-e178-48ae-8836-f7b5dc5f61e0",
+      "name": "Anthropic Chat Model1",
+      "credentials": {
+        "anthropicApi": {
+          "id": "VTpIHqgUoKAhPG25",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"url0\": \"https://www.whitehouse.gov/presidential-actions/\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2120,
+        600
+      ],
+      "id": "6deda81b-4c61-49c0-bccb-b8609daf5c71",
+      "name": "Set Initial URL"
+    },
+    {
+      "parameters": {
+        "url": "={{$json[\"url0\"]}}",
+        "responseFormat": "string",
+        "options": {}
+      },
+      "id": "4ab5f907-492d-4825-a1b6-862c3f892725",
+      "name": "Fetch EO Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        -1900,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT *\nFROM executive_orders\nWHERE relevance_score >= 2\n  AND is_published_in_newsletter IS NOT TRUE\nORDER BY date_posted_et DESC\nLIMIT 3;",
+        "options": {
+          "queryBatching": "independently"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -840,
+        160
+      ],
+      "id": "ff228b4b-8d8c-4e82-a109-dac99d8925b2",
+      "name": "Pull 3 EOs",
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "dBqsBvg5NiNF86t6",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{$now}}\n\nYou are provided a JSON array of analyzed Executive Orders. Convert this into a clean, structured HTML email formatted as the **EO Intelligence Brief**.\n\nEach EO in the array contains metadata and impact analysis intended for executive-level readers. The audience includes senior decision-makers across government and industry—such as DoD, DHS, civilian agencies, integrators, federal contractors, public-sector strategists, and VCs. Focus on clarity, structure, and professional readability across platforms.\n\nLimit additional commentary. Return only the following JSON:\n\n  \"subject\": \"...\",\n  \"html\": \"...\"\n\n\nInput JSON:\n{{ JSON.stringify($json.executive_orders, null, 2) }}\n",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a high-performance policy-to-industry newsletter generation agent trained to serve SES, CXO, and Flag Officer audiences across the U.S. Government, Department of Defense, and the GovCon ecosystem.\n\nYour task is to convert a structured JSON array of Executive Orders into a fully formatted, HTML-only email briefing titled **EO Intelligence Brief**, designed for professional inbox consumption.\n\nYou must optimize for:\n\n– Gmail and Outlook rendering consistency  \n– Responsive, mobile-first design (scales cleanly on phones, tablets, desktops)  \n– Light and dark mode email clients (via `prefers-color-scheme` inline strategies)  \n– Skimmable formatting for high-level readers (bold labels, spacing, grouping)  \n– Accessibility (semantic tags, legible type, intuitive hierarchy)  \n\n💡 **Design and Layout Guidelines (Strictly Follow):**\n\n- All HTML must use **inline CSS only** (no `<style>` tags or external stylesheets)\n- Each EO must be wrapped in a **light gray card** using `#f8f9fa` background with padding and rounded corners\n- Ensure enough vertical spacing (`margin-top: 24px`) between EO cards\n- Use Arial, Helvetica, or system UI fonts only\n- Indented bullets with **bold section headers** (e.g., **Policy Intent:** text)\n- Avoid unnecessary visual noise (keep it clean and purpose-driven)\n- Logical HTML order: title → posted date → summary → strategic bullets → keywords → source link\n\n📱 **Mobile + Dark Mode Support:**\n\n- Structure HTML using mobile-first sizing (16–18px base font)\n- Use color schemes compatible with:\n```css\n@media (prefers-color-scheme: dark) {\n  /* Inline-supportive color fallbacks */\n}\n```\n\n🧠 **Top Header:**\n```html\n<h1 style=\"font-size: 22px; font-weight: bold; margin-bottom: 16px;\">🧠 EO Intelligence Brief – As of MMM DD YYYY</h1>\n```\n\n📄 **EO Section Template (one per entry):**\n```html\n<div style=\"background: #f8f9fa; padding: 16px; border-radius: 8px; margin-top: 24px;\">\n  <h2 style=\"margin: 0 0 4px 0;\">{Title}</h2>\n  <p style=\"margin: 0 0 12px 0; font-size: 13px;\">Posted: {Date}</p>\n  <p style=\"margin: 0 0 12px 0;\">{Summary paragraph}</p>\n  <ul style=\"padding-left: 20px; margin: 0 0 12px 0;\">\n    <li><strong>Policy Intent:</strong> {text}</li>\n    <li><strong>Agency Impact:</strong> {text}</li>\n    <li><strong>Contractor Implications:</strong> {text}</li>\n    <li><strong>Budgetary Signals:</strong> {text}</li>\n    <li><strong>Watchpoints:</strong> {text}</li>\n  </ul>\n  <p style=\"font-size: 13px; margin: 0 0 8px 0;\"><strong>Keywords:</strong> keyword1, keyword2, keyword3</p>\n  <a href=\"{url}\" style=\"font-size: 13px; text-decoration: underline;\">📖 Read Full EO</a>\n</div>\n```\n\n🧾 **Footer:**\n```html\n<hr style=\"margin-top: 32px;\"/>\n<p style=\"font-size: 12px; color: #888;\">\nThis EO Intelligence Brief was prepared by the team at\n<a href=\"https://www.porbanderwala.com\" style=\"color: inherit; text-decoration: underline;\">Porbanderwala.com</a>, delivering AI-enhanced situational awareness for the public-sector ecosystem.\n</p>\n```\n\n🎯 **Audience Context:**\nYour readers include:\n- Federal agency executives\n- Strategy and acquisition leaders\n- Defense contractors and BD teams\n- Public policy analysts and government technologists\n\n📦 **Final Output Format (strict):**\nReturn this JSON object:\n\n  \"subject\": \"EO Brief: Concise subject under 100 characters\",\n  \"html\": \"HTML-formatted body using inline CSS only\"\n\n\n\n⚠️ The `subject` must **always start** with: `EO Brief:`  \n❌ Do not include markdown, comments, extraneous text, or system messages.\n"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        -960,
+        -180
+      ],
+      "id": "8f9b12ff-ae76-4da3-94ba-76fb4e35193d",
+      "name": "Build NewsLetter",
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bb1a6026-5063-4e88-8cc8-86dfe8ae2843",
+              "name": "output.subject",
+              "value": "={{ $json.output?.subject || 'NO SUBJECT FOUND' }}",
+              "type": "string"
+            },
+            {
+              "id": "a8ec8d33-9b57-4325-a072-fc2b6acccc4d",
+              "name": "output.html",
+              "value": "={{ $json.output?.html || '<p>NO HTML FOUND</p>' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -160,
+        -260
+      ],
+      "id": "21160fae-8bfc-4e69-a87b-d3a6e9c35f7b",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "executive_orders",
+          "mode": "list",
+          "cachedResultName": "executive_orders"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "summary",
+              "condition": "IS NOT NULL"
+            },
+            {
+              "column": "content",
+              "condition": "IS NOT NULL"
+            },
+            {
+              "column": "is_published_in_newsletter",
+              "value": "false"
+            }
+          ]
+        },
+        "sort": {
+          "values": [
+            {
+              "column": "date_posted_et",
+              "direction": "DESC"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1460,
+        20
+      ],
+      "id": "e713cb74-238f-4096-9f80-dfec8db41b5f",
+      "name": "Find Processed",
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "dBqsBvg5NiNF86t6",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        -1040,
+        160
+      ],
+      "id": "038c19be-f8f6-435b-9215-5ebdd2372bc1",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n// Pick earliest date_posted_et to anchor the \"Week Of\"\nconst earliestDate = items\n  .map(i => new Date(i.json.date_posted_et))\n  .sort((a, b) => a - b)[0];\n\nconst weekOf = earliestDate.toLocaleDateString(\"en-US\", {\n  month: \"short\",\n  day: \"2-digit\",\n  year: \"numeric\"\n});\n\n// Return a single item with the combined structure\nreturn [{\n  json: {\n    week_of: weekOf,\n    executive_orders: items.map(i => i.json)\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1120,
+        -180
+      ],
+      "id": "68a530ac-05c4-4715-b352-28c6e45b5d44",
+      "name": "Combine EOs for Newsletter"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "73de87e8-9e5b-4cd7-a269-89d76475b52f",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1300,
+        320
+      ],
+      "id": "6e235886-e035-4882-b1b7-e8f76db8618a",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2340,
+        600
+      ],
+      "id": "e99c2afd-754b-4162-8510-d4224db0e0fa",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "15 8-18 * * 1-6"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2340,
+        800
+      ],
+      "id": "aba1cdea-1e70-45e3-8f44-5d8b7705558f",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "executive_orders",
+          "mode": "list",
+          "cachedResultName": "executive_orders"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "is_vectorized": false,
+            "is_summarized": false,
+            "is_published": true,
+            "is_published_in_newsletter": true,
+            "id": "={{ $json.id }}",
+            "page_number": 0,
+            "relevance_score": 0,
+            "published_in_newsletter_at": "2025-04-13T00:14:03"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "date_posted_et",
+              "displayName": "date_posted_et",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tags",
+              "displayName": "tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "array",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "scraped_at",
+              "displayName": "scraped_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "page_number",
+              "displayName": "page_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "version_hash",
+              "displayName": "version_hash",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "is_vectorized",
+              "displayName": "is_vectorized",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "is_summarized",
+              "displayName": "is_summarized",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "is_published",
+              "displayName": "is_published",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "vector_id",
+              "displayName": "vector_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "policy_intent",
+              "displayName": "policy_intent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "agency_impact",
+              "displayName": "agency_impact",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "contractor_implications",
+              "displayName": "contractor_implications",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "budgetary_signals",
+              "displayName": "budgetary_signals",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "watchpoints",
+              "displayName": "watchpoints",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "array",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "strategic_keywords",
+              "displayName": "strategic_keywords",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "array",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "relevance_score",
+              "displayName": "relevance_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "is_published_in_newsletter",
+              "displayName": "is_published_in_newsletter",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "published_in_newsletter_at",
+              "displayName": "published_in_newsletter_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -320,
+        240
+      ],
+      "id": "21b4a340-fd34-477c-a2db-9245ab510d7d",
+      "name": "Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "dBqsBvg5NiNF86t6",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -660,
+        260
+      ],
+      "id": "442ac2de-90e6-4d94-839c-dfd6221eb466",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -960,
+        20
+      ],
+      "id": "6109f28a-8100-4f85-95af-1d09138dd878",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "thzyP3igUBbPLjAB",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.text }}",
+        "schemaType": "fromJson",
+        "jsonSchemaExample": "{\n  \"subject\": \"...\",\n  \"html\": \"...\"\n}",
+        "options": {
+          "systemPromptTemplate": "You are an expert extraction algorithm.\nOnly extract relevant information from the text.\nIf you do not know the value of an attribute asked to extract, you may omit the attribute's value."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        -180
+      ],
+      "id": "656f9668-51ed-4308-a14f-e9fa2717aeaa",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -580,
+        20
+      ],
+      "id": "4a1e9523-8d85-48e4-b628-821960bc5721",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "thzyP3igUBbPLjAB",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Extract EO Links": {
+      "main": [
+        [
+          {
+            "node": "Normalize EO Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Set Initial URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Articles": {
+      "main": [
+        [
+          {
+            "node": "Extract EO Links",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if Exists": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Insert New Record",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SplitInBatches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert New Record": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize EO Fields": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SplitInBatches": {
+      "main": [
+        [
+          {
+            "node": "Find Unprocessed",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Find Processed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Check if Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Unprocessed": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SplitInBatches2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Fetch EO HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch EO HTML": {
+      "main": [
+        [
+          {
+            "node": "Extract EO Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract EO Content": {
+      "main": [
+        [
+          {
+            "node": "Clean Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Content": {
+      "main": [
+        [
+          {
+            "node": "Create Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Prompt": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Update Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Perplexity Search": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Record": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Initial URL": {
+      "main": [
+        [
+          {
+            "node": "Fetch EO Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch EO Page": {
+      "main": [
+        [
+          {
+            "node": "Extract Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull 3 EOs": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Combine EOs for Newsletter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build NewsLetter": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Processed": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Pull 3 EOs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine EOs for Newsletter": {
+      "main": [
+        [
+          {
+            "node": "Build NewsLetter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Set Initial URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Initial URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Postgres",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Build NewsLetter",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  }
+}
