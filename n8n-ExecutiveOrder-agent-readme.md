@@ -200,7 +200,7 @@ AI-powered situational awareness for the GovCon and public-sector policy communi
 
 ## 12. License
 
-Open-source, MIT or Apache 2.0 (confirm per repo standard).
+Open-source, MIT.
 
 
 
