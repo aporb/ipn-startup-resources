@@ -14,7 +14,6 @@ We believe in pluralism — embracing different approaches while finding common 
 
 - [What You'll Find Here](#-what-youll-find-here)
 - [Repository Structure](#-repository-structure)  
-- [Prerequisites](#-prerequisites)
 - [Featured Resources](#-featured-resources)
 - [Developer Tools](#-developer-tools)
 - [Educational Resources](#-educational-resources)
@@ -63,26 +62,6 @@ ipn-startup-resources/
 ├── LICENSE
 └── README.md
 ```
-
----
-
-## 🔧 Prerequisites
-
-Before diving in, make sure you have:
-
-### Required
-- **Node.js** (LTS version recommended) - for running n8n and workflows
-- **Git** - for cloning and contributing to the repository
-
-### Workflow-Specific Requirements
-- **n8n** - workflow automation platform (`npm install -g n8n`)
-- **PostgreSQL** - for workflows that require data persistence
-- **API Keys** - for AI services (OpenAI, Anthropic, Perplexity) as needed per workflow
-
-### Optional but Recommended
-- **Docker** - for containerized deployments
-- **Postman/Insomnia** - for testing webhook integrations
-- Basic familiarity with **JSON** and **REST APIs**
 
 ---
 
