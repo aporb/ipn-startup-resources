@@ -144,7 +144,7 @@ Whether you're an IPN member in Toronto, a startup founder in Karachi, a develop
 - [Telegram AI Agent](./workflows/n8n-telegram-ai-agent/README.md) - AI-powered Telegram bot with LangChain integration for personal productivity and automation
 - [Executive Order Intelligence Agent](./workflows/n8n-executive-order-agent/README.md) - Automated policy analysis and newsletter generation pipeline for GovCon intelligence
 
-**Connect:** [IPN LinkedIn Group](https://www.linkedin.com/groups/1218897/) | [IPN LinkedIn Company Page](https://www.linkedin.com/company/ismaili-professionals-network/posts/) | [GitHub](https://github.com/aporb)
+**Connect:** [LinkedIn](https://linkedin.com/in/aporbanderwala) | [GitHub](https://github.com/aporb)
 
 #### Akbar Aziz ([@akbaraziz](https://github.com/akbaraziz))
 **Solutions Architect @ Palo Alto Networks**
@@ -194,4 +194,4 @@ If this repository helps you build something meaningful:
 
 *Built with ❤️ for the global Ismaili community and builders everywhere*
 
-**Contact:** [GitHub Issues](https://github.com/aporb/ipn-startup-resources/issues) | [LinkedIn](https://www.linkedin.com/in/amynporb) | [IPN Startup WhatsApp Group](https://ipn.link/startups)
+**Contact:** [GitHub Issues](https://github.com/aporb/ipn-startup-resources/issues) | [IPN LinkedIn Group](https://www.linkedin.com/groups/1218897/) | [IPN Startup WhatsApp Group](https://ipn.link/startups)
