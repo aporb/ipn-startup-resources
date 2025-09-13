@@ -52,10 +52,12 @@ ipn-startup-resources/
 ├── workflows/                 # Ready-to-deploy automation workflows
 │   ├── n8n-telegram-ai-agent/       # Telegram AI bot with LangChain
 │   └── n8n-executive-order-agent/   # Government EO intelligence agent
-├── prompts/                   # AI prompt templates and frameworks (coming soon)
+├── prompts/                   # AI prompt templates and frameworks
+│   └── meeting-transcript-analysis.md
 ├── automations/              # Standalone automation scripts (coming soon)  
 ├── frameworks/               # Reusable system architectures (coming soon)
 ├── docs/                     # Educational resources and reports
+│   ├── claude-code-subagent-manager.md
 │   └── DoD-SBIR-STTR-101-Webinar-Report.md
 ├── LICENSE
 └── README.md
