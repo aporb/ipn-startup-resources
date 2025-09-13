@@ -4,11 +4,11 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/aporb/ipn-startup-resources)](https://github.com/aporb/ipn-startup-resources/commits/main)
 [![GitHub stars](https://img.shields.io/github/stars/aporb/ipn-startup-resources?style=social)](https://github.com/aporb/ipn-startup-resources/stargazers)
 
-This repo is for anyone in the IPN network — or beyond — trying to build something real.
+This repo is for anyone in the IPN network — and the global Ismaili community — trying to build something meaningful.
 
-Whether you're just getting started or already deep in the game, my goal with this is simple: give you working, remixable tools you can deploy today. *Automations. Prompts. Agents. Frameworks. Systems.* Things I wish I had when I started my journey.
+Whether you're just getting started or already deep in the game, our goal is simple: share knowledge and tools that help each other succeed. In the spirit of our 1,400-year tradition of seeking knowledge for the betterment of ourselves and our communities, we're building a collection of practical resources that anyone can use and improve upon.
 
-I'm sharing what I use, what works, and how it all connects.
+We believe in pluralism — embracing different approaches while finding common ground. We believe in self-reliance through shared knowledge. Most importantly, we believe in lifting each other up.
 
 ## 📋 Table of Contents
 
@@ -162,23 +162,15 @@ Full report: [`docs/DoD-SBIR-STTR-101-Webinar-Report.md`](./docs/DoD-SBIR-STTR-1
 
 ## 👥 Who This Is For
 
-### 🎯 Primary Audience
-- **IPN Network Members** - Ismaili professionals building businesses and careers
-- **Startup Founders** - Early-stage entrepreneurs needing automation and AI tools
-- **Solo Entrepreneurs** - Building lean, efficient operations from day one
-- **Small Business Owners** - Looking to compete with larger players through smart automation
+This is for builders in the global Ismaili community and beyond who believe that knowledge should be shared, that we grow stronger together, and that technology can be a force for improving quality of life.
 
-### 🏢 Secondary Audience  
-- **GovCon Professionals** - Federal contractors needing intelligence and analysis tools
-- **Consultants & Agencies** - White-labeling solutions for clients
-- **Technical Leaders** - CIOs, CTOs seeking practical AI implementations
-- **Students & Learners** - Understanding real-world AI/automation applications
+Whether you're an IPN member in Toronto, a startup founder in Karachi, a developer in London, or an entrepreneur in Nairobi — if you're trying to build something that matters, you'll find value here. We welcome everyone who shares our ethic of collaboration, pluralism, and mutual support.
 
 ### 💡 What You Get
-- **Working Solutions** - Not just theory, but deployable tools
-- **Learning by Example** - Study how problems are solved, then adapt
-- **Community Support** - Connect with like-minded builders
-- **Cost-Effective Growth** - Scale without burning capital on custom development
+- **Knowledge Sharing** - Learn from what others have built and tested
+- **Community Support** - Connect with builders who want to help each other succeed  
+- **Self-Reliance Tools** - Resources that help you become independent and capable
+- **Meaningful Impact** - Solutions focused on improving quality of life, not just profit
 
 ---
 
@@ -235,23 +227,23 @@ n8n start
 
 ## 🧠 How to Use This
 
-* Don't copy everything — study how it solves a problem, then tailor it.
+* Don't copy everything — study how it solves a problem, then tailor it to your needs.
 * Store your credentials securely using n8n's built-in tools.
 * Run workflows locally first, then move to Docker or cloud deployment when ready.
-* Want a demo? DM me in the IPN group or drop a question.
+* Want a demo? Reach out in the IPN group or drop us a question.
 
 ---
 
-## 🌱 Growing Organically
+## 🌱 Growing Through Shared Knowledge
 
-This repository evolves based on what the community actually builds, uses, and finds valuable. Rather than promising specific deliverables, we let the collection grow naturally through:
+True to our tradition of pooling knowledge and resources, this repository grows through community contributions. We don't promise specific deliverables — instead, we let the collection evolve based on what our global community actually builds, uses, and finds valuable.
 
-- **Community contributions** - Tools and workflows that solve real problems
-- **Educational resources** - Insights from actual experiences and implementations  
-- **Practical automation** - Working solutions that you can deploy today
-- **Curated prompts** - Templates that have been tested in real scenarios
+- **Knowledge Sharing** - Tools and insights that solve real problems
+- **Collaborative Learning** - Learning from each other's experiences
+- **Self-Reliance** - Resources that help individuals and communities become independent
+- **Quality of Life** - Solutions that make meaningful differences
 
-The best resources come from builders sharing what actually works. If you've built something useful, we'd love to feature it.
+The best resources come from our community sharing what actually works. If you've built something useful, we'd love to feature it.
 
 ---
 
@@ -309,18 +301,18 @@ The best resources come from builders sharing what actually works. If you've bui
 
 ---
 
-## 🌍 Bigger Picture
+## 🌍 Our Bigger Picture
 
-I built this for the people I wish I had on the journey.
+We built this for the global Ismaili community and all builders who share our values.
 
-### The Mission
-Too many great ideas die not from lack of vision, but from lack of practical, working tools. This repository bridges that gap by providing real, deployable solutions you can adapt and scale.
+### Our Mission
+In the spirit of our tradition of seeking knowledge for betterment, we're creating a space where practical tools and wisdom can be shared freely. Too many great ideas fail not from lack of vision, but from lack of access to the right resources and community support.
 
-### The Community
-Whether you're part of the Ismaili Professional Network or any community looking to build meaningful solutions, this is for builders who believe that smart automation and AI can level the playing field.
+### Our Community
+Whether you're part of the Ismaili Professional Network, the broader global Ismaili community, or any group committed to pluralism and mutual support — this is for builders who believe that sharing knowledge and lifting each other up creates opportunities for everyone.
 
-### The Impact
-Every workflow, prompt, and framework here has been battle-tested in real businesses. Take what works, adapt it to your context, and build something that matters.
+### Our Impact
+Every tool, workflow, and resource here reflects our commitment to improving quality of life through technology and collaboration. We take what works, share it openly, and help each other build something meaningful.
 
 ---
 
@@ -335,6 +327,6 @@ If this repository helps you build something meaningful:
 
 ---
 
-**Let's raise the bar for what's possible — and who gets to build it.**
+**Together, let's raise the bar for what's possible — and who gets to build it.**
 
-*Built with ❤️ for builders everywhere*
+*Built with ❤️ for the global Ismaili community and builders everywhere*
