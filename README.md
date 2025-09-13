@@ -194,4 +194,4 @@ If this repository helps you build something meaningful:
 
 *Built with ❤️ for the global Ismaili community and builders everywhere*
 
-**Contact:** [GitHub Issues](https://github.com/aporb/ipn-startup-resources/issues) | [LinkedIn](https://www.linkedin.com/in/amynporb) | [IPN Network](https://t.me/ipn_group)
+**Contact:** [GitHub Issues](https://github.com/aporb/ipn-startup-resources/issues) | [LinkedIn](https://www.linkedin.com/in/amynporb) | [IPN Startup WhatsApp Group](https://ipn.link/startups)
