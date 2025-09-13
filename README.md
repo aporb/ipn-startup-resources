@@ -15,7 +15,7 @@ I'm sharing what I use, what works, and how it all connects.
 - [What You'll Find Here](#-what-youll-find-here)
 - [Repository Structure](#-repository-structure)  
 - [Prerequisites](#-prerequisites)
-- [Featured Workflows](#-featured-workflows)
+- [Featured Resources](#-featured-resources)
 - [Developer Tools](#-developer-tools)
 - [Educational Resources](#-educational-resources)
 - [Who This Is For](#-who-this-is-for)
@@ -86,9 +86,9 @@ Before diving in, make sure you have:
 
 ---
 
-## ⚡ Featured Workflows
+## ⚡ Featured Resources
 
-### 🤖 Telegram AI Agent (Built in n8n + LangChain)
+### 🤖 Telegram AI Agent (n8n Workflow)
 
 A fully operational Telegram bot that connects to an AI agent using LangChain. It routes tool calls (Gmail, Bitly, Weather, etc), enriches prompts, and logs chat memory to Postgres.
 
@@ -99,7 +99,7 @@ A fully operational Telegram bot that connects to an AI agent using LangChain. I
 📖 **Setup:** [`workflows/n8n-telegram-ai-agent/README.md`](./workflows/n8n-telegram-ai-agent/README.md)  
 💾 **Workflow:** [`workflows/n8n-telegram-ai-agent/workflow.json`](./workflows/n8n-telegram-ai-agent/workflow.json)
 
-### 🏛️ Executive Order Intelligence Agent
+### 🏛️ Executive Order Intelligence Agent (n8n Workflow)
 
 An automated, AI-powered pipeline in n8n that:
 
@@ -115,11 +115,7 @@ An automated, AI-powered pipeline in n8n that:
 📖 **Setup:** [`workflows/n8n-executive-order-agent/README.md`](./workflows/n8n-executive-order-agent/README.md)  
 💾 **Workflow:** [`workflows/n8n-executive-order-agent/workflow.json`](./workflows/n8n-executive-order-agent/workflow.json)
 
----
-
-## 🛠️ Developer Tools
-
-### Claude Code Subagent Manager
+### 🛠️ Claude Code Subagent Manager (Developer Tool)
 *By [Akbar Aziz](https://github.com/akbaraziz) - Solutions Architect @ Palo Alto Networks*
 
 Interactive installer for Claude Code subagents from the awesome-claude-code-subagents community repository. Access 126+ specialized AI subagents across 10 categories with both CLI and cross-platform GUI interfaces.
@@ -145,6 +141,12 @@ claude-subagents --gui
 
 📖 **Full Documentation:** [`docs/claude-code-subagent-manager.md`](./docs/claude-code-subagent-manager.md)  
 📦 **NPM Package:** [claude-code-subagent-manager](https://www.npmjs.com/package/claude-code-subagent-manager)
+
+---
+
+## 🛠️ Developer Tools
+
+*Additional developer tools and community contributions will be featured here as the repository grows.*
 
 ---
 
@@ -189,8 +191,9 @@ cd ipn-startup-resources
 
 ### Choose Your Path:
 1. **Start with Telegram AI Agent** → `cd workflows/n8n-telegram-ai-agent` → Follow the README
-2. **Explore Government Intelligence** → `cd workflows/n8n-executive-order-agent` → Follow the README  
-3. **Browse Educational Content** → `ls docs/` → Pick a topic that interests you
+2. **Explore Government Intelligence** → `cd workflows/n8n-executive-order-agent` → Follow the README
+3. **Try Claude Code Subagent Manager** → `npm install -g claude-code-subagent-manager` → Run `claude-subagents`
+4. **Browse Educational Content** → `ls docs/` → Pick a topic that interests you
 
 ### Verify Your Setup:
 ```bash
