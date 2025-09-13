@@ -16,6 +16,7 @@ I'm sharing what I use, what works, and how it all connects.
 - [Repository Structure](#-repository-structure)  
 - [Prerequisites](#-prerequisites)
 - [Featured Workflows](#-featured-workflows)
+- [Developer Tools](#-developer-tools)
 - [Educational Resources](#-educational-resources)
 - [Who This Is For](#-who-this-is-for)
 - [Quickstart](#-quickstart)
@@ -23,6 +24,7 @@ I'm sharing what I use, what works, and how it all connects.
 - [How to Use This](#-how-to-use-this)
 - [Roadmap](#-roadmap)
 - [Contributing](#-want-to-contribute)
+- [Contributors](#-contributors)
 - [Contact](#-contact)
 - [Bigger Picture](#-bigger-picture)
 
@@ -109,6 +111,37 @@ An automated, AI-powered pipeline in n8n that:
 
 📖 **Setup:** [`workflows/n8n-executive-order-agent/README.md`](./workflows/n8n-executive-order-agent/README.md)  
 💾 **Workflow:** [`workflows/n8n-executive-order-agent/workflow.json`](./workflows/n8n-executive-order-agent/workflow.json)
+
+---
+
+## 🛠️ Developer Tools
+
+### Claude Code Subagent Manager
+*By [Akbar Aziz](https://github.com/akbaraziz) - Solutions Architect @ Palo Alto Networks*
+
+Interactive installer for Claude Code subagents from the awesome-claude-code-subagents community repository. Access 126+ specialized AI subagents across 10 categories with both CLI and cross-platform GUI interfaces.
+
+**Key Features:**
+- **126+ Subagents** across Core Development, Language Specialists, Infrastructure, Quality & Security, Data & AI, and more
+- **Cross-Platform GUI** for Windows, macOS, and Linux
+- **Command-Line Interface** for automation and power users
+- **GitHub Token Support** for enhanced API rate limits (5,000 vs 60 requests/hour)
+- **Smart Installation** with conflict management and validation
+
+**Quick Start:**
+```bash
+# Install globally
+npm install -g claude-code-subagent-manager
+
+# Interactive CLI installer
+claude-subagents
+
+# Launch GUI interface
+claude-subagents --gui
+```
+
+📖 **Full Documentation:** [`docs/claude-code-subagent-manager.md`](./docs/claude-code-subagent-manager.md)  
+📦 **NPM Package:** [claude-code-subagent-manager](https://www.npmjs.com/package/claude-code-subagent-manager)
 
 ---
 
@@ -265,6 +298,19 @@ n8n start
 - Test with real data when possible
 
 **Too complex?** Just DM me and I'll help you add it in!
+
+---
+
+## 🤝 Contributors
+
+### Community Contributors
+
+#### Akbar Aziz ([@akbaraziz](https://github.com/akbaraziz))
+**Solutions Architect @ Palo Alto Networks**
+
+**Contribution:** [Claude Code Subagent Manager](./docs/claude-code-subagent-manager.md) - Interactive installer for 126+ Claude Code subagents. Published September 10, 2025.
+
+**Connect:** [LinkedIn](https://www.linkedin.com/in/akbaraziz/) | [GitHub](https://github.com/akbaraziz) | [NPM](https://www.npmjs.com/~akbaraziz)
 
 ---
 
