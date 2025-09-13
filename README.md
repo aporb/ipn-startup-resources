@@ -22,7 +22,7 @@ I'm sharing what I use, what works, and how it all connects.
 - [Quickstart](#-quickstart)
 - [Usage Examples](#-usage-examples)
 - [How to Use This](#-how-to-use-this)
-- [Roadmap](#-roadmap)
+- [Growing Organically](#-growing-organically)
 - [Contributing](#-want-to-contribute)
 - [Contributors](#-contributors)
 - [Contact](#-contact)
@@ -242,32 +242,16 @@ n8n start
 
 ---
 
-## 🗺️ Roadmap
+## 🌱 Growing Organically
 
-### Coming Soon
-- **Prompts Library** (`prompts/`) - Curated AI prompt templates for business use cases
-  - Customer service prompts
-  - Marketing copy generation
-  - Technical documentation
-  - Meeting summaries and action items
+This repository evolves based on what the community actually builds, uses, and finds valuable. Rather than promising specific deliverables, we let the collection grow naturally through:
 
-- **Automation Scripts** (`automations/`) - Standalone Python/Node.js scripts
-  - Social media schedulers  
-  - Data backup automations
-  - Report generators
-  - API integrations
+- **Community contributions** - Tools and workflows that solve real problems
+- **Educational resources** - Insights from actual experiences and implementations  
+- **Practical automation** - Working solutions that you can deploy today
+- **Curated prompts** - Templates that have been tested in real scenarios
 
-- **System Frameworks** (`frameworks/`) - Complete architectural patterns
-  - Multi-tenant SaaS boilerplate
-  - Serverless API frameworks
-  - Dashboard templates
-  - Authentication systems
-
-### Future Additions
-- Video tutorials and walkthroughs
-- Community showcase of adaptations
-- Integration templates for popular SaaS tools
-- Mobile app automation examples
+The best resources come from builders sharing what actually works. If you've built something useful, we'd love to feature it.
 
 ---
 
