@@ -35,11 +35,12 @@ I'm sharing what I use, what works, and how it all connects.
 This repo is a growing collection of:
 
 - Ready-to-run automations (like n8n workflows)
+- Developer tools and extensions for AI coding platforms
 - Agent prompt templates and decision frameworks
 - Lightweight stack ideas for bootstrapping
 - Curated open-source tools to help you move fast without burning capital
 
-Among the featured workflows is the **Executive Order Intelligence Agent** — a production-grade, end-to-end AI-powered pipeline built in n8n to scrape, analyze, and generate executive newsletters on U.S. Executive Orders, leveraging LangChain, Claude, OpenAI, Perplexity, and Postgres.
+Featured resources include the **Executive Order Intelligence Agent** — a production-grade, end-to-end AI-powered pipeline built in n8n — and the **Claude Code Subagent Manager** — providing access to 126+ specialized AI subagents for developers.
 
 Start with what clicks for you. No need to understand it all at once.
 
