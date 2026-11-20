@@ -76,6 +76,10 @@ Comprehensive analysis and insights from the Department of Defense Small Busines
 
 Full report: [`docs/DoD-SBIR-STTR-101-Webinar-Report.md`](./docs/DoD-SBIR-STTR-101-Webinar-Report.md)
 
+### Practice First-Pass Investor Due Diligence
+
+Use the [open investor question bank](https://huggingface.co/datasets/mheilimo/startup-investor-falsification-question-bank) to turn pitch claims into questions and identify what evidence could change your conclusion. The [fictional ExampleForge report](https://www.ddscore.ai/example-report) shows how those checks can be recorded in a first-pass review.
+
 ---
 
 ## 🚀 Getting Started
